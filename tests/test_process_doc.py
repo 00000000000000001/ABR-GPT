@@ -15,7 +15,7 @@ def test_abc():
     insert_answers_into_doc(messages, doc)
     assert find_start(p) == -1
     assert find_end(p) == -1
-    assert docx_tools.doc_text(doc) == "TEST"
+    assert docx_tools.combineDocText(doc) == "TEST"
 
 
 def test_empty():
@@ -26,7 +26,7 @@ def test_empty():
     insert_answers_into_doc(messages, doc)
     assert find_start(p) == -1
     assert find_end(p) == -1
-    assert docx_tools.doc_text(doc) == "TEST"
+    assert docx_tools.combineDocText(doc) == "TEST"
 
 
 def test_empty_two_tags():
@@ -38,7 +38,7 @@ def test_empty_two_tags():
     insert_answers_into_doc(messages, doc)
     assert find_start(p) == -1
     assert find_end(p) == -1
-    assert docx_tools.doc_text(doc) == "TESTBAUM"
+    assert docx_tools.combineDocText(doc) == "TESTBAUM"
 
 
 def test_empty_two_paragraphs():
@@ -52,7 +52,7 @@ def test_empty_two_paragraphs():
     assert find_end(p1) == -1
     assert find_start(p2) == -1
     assert find_end(p2) == -1
-    assert docx_tools.doc_text(doc) == "TEST"
+    assert docx_tools.combineDocText(doc) == "TEST"
 
 
 def test_empty_two_paragraphs_two_tags():
@@ -67,7 +67,7 @@ def test_empty_two_paragraphs_two_tags():
     assert find_end(p1) == -1
     assert find_start(p2) == -1
     assert find_end(p2) == -1
-    assert docx_tools.doc_text(doc) == "TESTBAUM"
+    assert docx_tools.combineDocText(doc) == "TESTBAUM"
 
 
 def test_nonempty_two_paragraphs_two_tags1():
@@ -82,7 +82,7 @@ def test_nonempty_two_paragraphs_two_tags1():
     assert find_end(p1) == -1
     assert find_start(p2) == -1
     assert find_end(p2) == -1
-    assert docx_tools.doc_text(doc) == "TESTBAUM"
+    assert docx_tools.combineDocText(doc) == "TESTBAUM"
 
 
 def test_nonempty_two_paragraphs_two_tags2():
@@ -97,7 +97,7 @@ def test_nonempty_two_paragraphs_two_tags2():
     assert find_end(p1) == -1
     assert find_start(p2) == -1
     assert find_end(p2) == -1
-    assert docx_tools.doc_text(doc) == "TESTBAUM"
+    assert docx_tools.combineDocText(doc) == "TESTBAUM"
 
 
 def test_nonempty_two_paragraphs_two_tags_and_text_inbetween():
@@ -112,4 +112,4 @@ def test_nonempty_two_paragraphs_two_tags_and_text_inbetween():
     assert find_end(p1) == -1
     assert find_start(p2) == -1
     assert find_end(p2) == -1
-    assert docx_tools.doc_text(doc) == "aTESTbBAUMc"
+    assert docx_tools.combineDocText(doc) == "aTESTbBAUMc"

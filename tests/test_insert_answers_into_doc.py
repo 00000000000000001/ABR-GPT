@@ -16,7 +16,7 @@ def test_insert_answers_into_doc1():
     doc.add_paragraph("</gpt>")
     answers = main.collect_messages(doc)
     main.insert_answers_into_doc(answers, doc)
-    assert docx_tools.doc_text(doc) == "FOOBAR"
+    assert docx_tools.combineDocText(doc) == "FOOBAR"
 
 
 def test_insert_answers_into_doc2():
@@ -25,7 +25,7 @@ def test_insert_answers_into_doc2():
     doc.add_paragraph("</gpt>")
     answers = main.collect_messages(doc)
     main.insert_answers_into_doc(answers, doc)
-    assert docx_tools.doc_text(doc) == ""
+    assert docx_tools.combineDocText(doc) == ""
 
 
 def test_insert_answers_into_doc3():
@@ -33,4 +33,4 @@ def test_insert_answers_into_doc3():
     doc.add_paragraph("")
     answers = main.collect_messages(doc)
     main.insert_answers_into_doc(answers, doc)
-    assert docx_tools.doc_text(doc) == ""
+    assert docx_tools.combineDocText(doc) == ""
