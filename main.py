@@ -35,41 +35,6 @@ def find_end(p, start=0):
     return index
 
 
-def substring_between(m, p_start, n, p_end, docx):
-    """
-    Extrahiert einen Textbereich aus einem Docx-Dokument, beginnend bei der Position m im Absatz p_start
-    und endend bei der Position n im Absatz p_end.
-
-    :param m: Index, an dem der Text im Absatz p_start beginnt.
-    :param p_start: Index des Absatzes, in dem der Text beginnt.
-    :param n: Index, an dem der Text im Absatz p_end endet.
-    :param p_end: Index des Absatzes, in dem der Text endet.
-    :param docx: Das Docx-Dokument, aus dem der Text extrahiert werden soll.
-    :return: Der extrahierte Text als String.
-
-    :raises Exception: Wenn p_start oder p_end außerhalb der Grenzen der Absätze im Dokument liegen.
-    """
-    if p_start < 0 or p_start >= len(docx.paragraphs):
-        raise ValueError("p_start is out of bounds")
-    if p_end < 0 or p_end >= len(docx.paragraphs):
-        raise ValueError("p_end is out of bounds")
-
-    if p_start == p_end:
-        return docx.paragraphs[p_start].text[m:n]
-
-    string_parts = []
-    for i in range(p_start, p_end + 1):
-        p_text = docx.paragraphs[i].text
-        if i == p_start:
-            string_parts.append(p_text[m:])
-        elif i == p_end:
-            string_parts.append(p_text[:n])
-        else:
-            string_parts.append(p_text)
-
-    return "".join(string_parts)
-
-
 def collect_messages(docx):
     """
     Durchläuft ein Docx-Dokument und sammelt alle Teilstrings die sich zwischen den Start- und Endtags befinden mit Positionsangaben in einem Array.
@@ -105,7 +70,7 @@ def collect_messages(docx):
             if zeile[0] > -1 and zeile[1] > -1 and zeile[2] > -1 and zeile[3] > -1:
                 arr.append(
                     [
-                        substring_between(
+                        docx_tools.substring_between(
                             zeile[0] + 5, zeile[1], zeile[2], zeile[3], docx
                         ),
                         zeile[0] + 5,
@@ -166,10 +131,6 @@ def insert_answers_into_doc(messages, doc):
         docx_tools.replace_text_in_doc(m - 5, p_start, n + 6, p_end, doc, text)
 
 
-def process_document(doc):
-    validate_and_process_gpt_tags(doc)
-
-
 def validate_and_process_gpt_tags(cell):
     """
     Überprüft, ob in einem gegebenen Zell-Objekt die '<gpt>' und '</gpt>' Tags korrekt gepaart und nicht verschachtelt sind.
@@ -192,13 +153,9 @@ def validate_and_process_gpt_tags(cell):
     return ""
 
 
-def process_tables(doc):
-    docx_tools.iterate_tables(doc, validate_and_process_gpt_tags)
-
-
 def start_processing(doc):
-    process_document(doc)
-    process_tables(doc)
+    validate_and_process_gpt_tags(doc)
+    docx_tools.iterate_tables(doc, validate_and_process_gpt_tags)
 
 
 def work():
