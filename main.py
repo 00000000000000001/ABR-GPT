@@ -69,56 +69,6 @@ def substring_between(m, p_start, n, p_end, docx):
 
     return "".join(string_parts)
 
-    # def collect_messages(docx):
-    """
-    Durchläuft ein Docx-Dokument und sammelt alle Teilstrings die sich zwischen den Start- und Endtags befinden mit Positionsangaben in einem Array.
-
-    :param docx: Das Docx-Dokument in dem nach GPT-Nachrichten gesucht werden soll.
-    :return: Ein Array mit den Textpassagen und deren Startindex, Startabsatz, Endindex, Endabsatz.
-    """
-
-    messages = []
-    m = -1
-    n = -1
-    p_start = -1
-    p_end = -1
-    cursor = 0
-
-    for i in range(len(docx.paragraphs)):
-        p = docx.paragraphs[i]
-        cursor = 0
-
-        while not find_start(p, cursor) == -1 or not find_end(p, cursor) == -1:
-
-            if m == -1:
-                m = find_start(p, cursor)
-                if not m == -1:
-                    p_start = i
-                    cursor = m + 4
-
-            if not m == -1 and n == -1:
-                n = find_end(p, cursor)
-                if not n == -1:
-                    p_end = i
-                    cursor = n + 5
-
-            if not m == -1 and not n == -1:
-                messages.append(
-                    [
-                        substring_between(m + 5, p_start, n, p_end, docx),
-                        m + 5,
-                        p_start,
-                        n,
-                        p_end,
-                    ]
-                )
-                m = -1
-                n = -1
-                p_start = -1
-                p_end = -1
-
-    return messages
-
 
 def collect_messages(docx):
     """
@@ -217,28 +167,33 @@ def insert_answers_into_doc(messages, doc):
 
 
 def process_document(doc):
-    if not check_gpt_pairs_and_no_nesting(docx_tools.doc_text(doc)):
+    validate_and_process_gpt_tags(doc)
+
+
+def validate_and_process_gpt_tags(cell):
+    """
+    Überprüft, ob in einem gegebenen Zell-Objekt die '<gpt>' und '</gpt>' Tags korrekt gepaart und nicht verschachtelt sind.
+    Verarbeitet dann die Nachrichten innerhalb der Tags, ersetzt sie durch entsprechende Antworten und fügt diese in das Dokument ein.
+
+    Parameter:
+    - cell: Das Zell-Objekt, das auf gültige '<gpt>' und '</gpt>' Tags überprüft und verarbeitet wird.
+
+    Return:
+    - Ein leerer String, symbolisch für das Fehlen eines expliziten Rückgabewertes, da die Funktion direkt das Dokument modifiziert.
+    """
+
+    if not check_gpt_pairs_and_no_nesting(docx_tools.doc_text(cell)):
         raise Exception(
             "Ungültige Struktur: Für jedes '<gpt>' muss ein korrespondierendes '</gpt>' vorhanden sein. Verschachtelungen sind nicht erlaubt. Bitte überprüfen Sie die Paarung der Tags."
         )
-    messages = collect_messages(doc)
-    # print(messages)
+    messages = collect_messages(cell)
     messages = replace_messages_by_answers(messages)
-    insert_answers_into_doc(messages, doc)
+    insert_answers_into_doc(messages, cell)
+    return ""
 
 
 def process_tables(doc):
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                if not check_gpt_pairs_and_no_nesting(docx_tools.doc_text(cell)):
-                    raise Exception(
-                        "Ungültige Struktur: Für jedes '<gpt>' muss ein korrespondierendes '</gpt>' vorhanden sein. Verschachtelungen sind nicht erlaubt. Bitte überprüfen Sie die Paarung der Tags."
-                    )
-                messages = collect_messages(cell)
-                # print(messages)
-                messages = replace_messages_by_answers(messages)
-                insert_answers_into_doc(messages, cell)
+    docx_tools.iterate_tables(doc, validate_and_process_gpt_tags)
 
 
 def start_processing(doc):
@@ -252,7 +207,6 @@ def work():
     briefe = glob.glob(file_input + "*.docx")
 
     for brief in briefe:
-        # print("checking: " + brief)
         doc = docx.Document(brief)
         pattern = r"\$\[.+\]\$"
         string = docx_tools.doc_text(doc)
