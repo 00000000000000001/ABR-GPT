@@ -70,7 +70,7 @@ def collect_messages(docx):
             if zeile[0] > -1 and zeile[1] > -1 and zeile[2] > -1 and zeile[3] > -1:
                 arr.append(
                     [
-                        docx_tools.substring_between(
+                        docx_tools.extractTextBetween(
                             zeile[0] + 5, zeile[1], zeile[2], zeile[3], docx
                         ),
                         zeile[0] + 5,
@@ -128,7 +128,7 @@ def insert_answers_into_doc(messages, doc):
         p_start = messages[i][2]
         p_end = messages[i][4]
         text = messages[i][0]
-        docx_tools.replace_text_in_doc(m - 5, p_start, n + 6, p_end, doc, text)
+        docx_tools.replaceDocTextSegment(m - 5, p_start, n + 6, p_end, doc, text)
 
 
 def validate_and_process_gpt_tags(cell):
@@ -143,7 +143,7 @@ def validate_and_process_gpt_tags(cell):
     - Ein leerer String, symbolisch für das Fehlen eines expliziten Rückgabewertes, da die Funktion direkt das Dokument modifiziert.
     """
 
-    if not check_gpt_pairs_and_no_nesting(docx_tools.doc_text(cell)):
+    if not check_gpt_pairs_and_no_nesting(docx_tools.combineDocText(cell)):
         raise Exception(
             "Ungültige Struktur: Für jedes '<gpt>' muss ein korrespondierendes '</gpt>' vorhanden sein. Verschachtelungen sind nicht erlaubt. Bitte überprüfen Sie die Paarung der Tags."
         )
@@ -155,7 +155,7 @@ def validate_and_process_gpt_tags(cell):
 
 def start_processing(doc):
     validate_and_process_gpt_tags(doc)
-    docx_tools.iterate_tables(doc, validate_and_process_gpt_tags)
+    docx_tools.concatTableTexts(doc, validate_and_process_gpt_tags)
 
 
 def work():
@@ -166,8 +166,8 @@ def work():
     for brief in briefe:
         doc = docx.Document(brief)
         pattern = r"\$\[.+\]\$"
-        string = docx_tools.doc_text(doc)
-        string += docx_tools.tables_text(doc)
+        string = docx_tools.combineDocText(doc)
+        string += docx_tools.extractInnerDocText(doc)
         if not re.search(pattern, string):
             pattern = r"<gpt>.*\<\/gpt>"
             if re.search(pattern, string, re.DOTALL):
